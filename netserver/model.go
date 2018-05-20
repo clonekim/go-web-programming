@@ -17,35 +17,35 @@ type User struct {
 	Email     *string   `json:"email"`
 	Sex       *string   `json:"sex"`
 	Birth     *string   `json:"birth"`
-	AgreeMkt  int8      `json:"agreeMkt"`
+	AgreeMkt  int8      `json:"agree_mkt"`
 	Image     *string   `json:"image"`
 	Sns       *string   `json:"sns"`
-	SnsId     *string   `json:"snsId"`
+	SnsId     *string   `json:"sns_id"`
 	Job       *string   `json:"job"`
 	City      *string   `json:"city"`
 	House     *string   `json:"house"`
 	Family    *string   `json:"family"`
-	SignCH    *string   `json:"signCH"`
-	SignPP    *string   `json:"signPP"`
-	CreatedAt time.Time `json:"createdAt"`
-	DeletedAt time.Time `json:"deletedAt"`
+	SignCh    *string   `json:"sign_ch"`
+	SignPp    *string   `json:"sign_pp"`
+	CreatedAt time.Time `json:"created_at"`
+	DeletedAt time.Time `json:"deleted_dt"`
 }
 
 type LoginLog struct {
 	Id      int       `json:"id" gorm:"primary_key"`
-	UserId  int       `json:"userId"`
-	LoginAt time.Time `json:"loginAt"`
+	UserId  int       `json:"user_id"`
+	LoginAt time.Time `json:"login_at"`
 }
 
 type Role struct {
 	Id       int    `json:"id" gorm:"primary_key"`
-	UserId   int    `json:"userId"`
-	RoleName string `json:"roleName"`
+	UserId   int    `json:"user_id"`
+	RoleName string `json:"role_name"`
 }
 
 type Address struct {
 	Id      int    `json:"id" gorm:"primary_key"`
-	UserId  int    `json:"userId"`
+	UserId  int    `json:"user_id"`
 	Name    string `json:"name"`
 	Line1   string `json:"line1"`
 	Line2   string `json:"line2"`
@@ -54,104 +54,105 @@ type Address struct {
 
 type Card struct {
 	Id        int       `json:"id" gorm:"primary_key"`
-	UserId    int       `json:"userId"`
-	CCName    string    `json:"ccName" gorm:"column:cc_name"`
-	CCPin     string    `json:"ccPin" gorm:"column:cc_pin"`
-	CreatedAt time.Time `json:"createdAt`
-	DeletedAt time.Time `json:"deletedAt`
+	UserId    int       `json:"user_id"`
+	CCName    string    `json:"cc_name" gorm:"column:cc_name"`
+	CCPin     string    `json:"cc_pin" gorm:"column:cc_pin"`
+	CreatedAt time.Time `json:"created_at`
+	DeletedAt time.Time `json:"deleted_at`
 }
 
 type Account struct {
-	UserId        int    `json:"userId" gorm:"primary_key"`
-	AccountName   string `json:"accountName"`
-	AccountNum    string `json:"accountNum"`
-	AccountHolder string `json:"accountHolder"`
+	UserId        int    `json:"user_id" gorm:"primary_key"`
+	AccountName   string `json:"account_name"`
+	AccountNum    string `json:"account_num"`
+	AccountHolder string `json:"account_holder"`
 }
+
 type Version struct {
 	Id        int       `json:"id"`
 	PK        int       `json:"pk"`
 	Tab       string    `json:"tab"`
 	Raw       string    `json:"raw"`
-	UpdaterId int       `json:"updaterId"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	UpdaterId int       `json:"updater_id"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type Order struct {
-	OrderId      int     `json:"orderId" gorm:"primary_key"`
-	UserId       int     `json:"userId"`
-	UserName     string  `json:"userName"`
-	UserTel      string  `json:"userTel"`
-	UserMemo     *string `json:"userMemo"`
+	OrderId      int     `json:"order_id" gorm:"primary_key"`
+	UserId       int     `json:"user_id"`
+	UserName     string  `json:"user_name"`
+	UserTel      string  `json:"user_tel"`
+	UserMemo     *string `json:"user_memo"`
 	Version      int     `json:"version" gorm:"primary_key"`
 	Subscription bool    `json:"subscription" gorm:"-"`
 }
 
 type History struct {
 	Id          int       `json:"id" gorm:"primary_key"`
-	OrderId     int       `json:"orderId"`
-	UpdaterId   int       `json:"userId"`
-	HistoryDate time.Time `json:"historyDate"`
+	OrderId     int       `json:"order_id"`
+	UpdaterId   int       `json:"user_id"`
+	HistoryDate time.Time `json:"history_date"`
 }
 
 type Subscription struct {
 	Id           int       `json:"id" gorm:"primary_key"`
-	OrderId      int       `json:"orderId"`
-	CCPin        string    `json:"ccPin"`
-	ScheduleDate *string   `json:"scheduleDate"`
-	CreatedAt    time.Time `json:"createdAt"`
-	DeletedAt    time.Time `json:"deletedAt"`
+	OrderId      int       `json:"order_d"`
+	CCPin        string    `json:"cc_pin" gorm:"column:cc_pin"`
+	ScheduleDate *string   `json:"schedule_date"`
+	CreatedAt    time.Time `json:"created_at"`
+	DeletedAt    time.Time `json:"deleted_at"`
 }
 
 type Payment struct {
 	Id          int        `json:"id" gorm:"primary_key"`
-	RelId       int        `json:"relId"`
-	OrderId     int        `json:"orderId"`
-	OnceToken   string     `json:"onceToken"`
+	RelId       int        `json:"rel_id"`
+	OrderId     int        `json:"order_id"`
+	OnceToken   string     `json:"once_token"`
 	Method      string     `json:"method"`
 	State       string     `json:"state"`
-	CCPin       string     `json:"ccPin" gorm:"column:cc_pin"`
+	CCPin       string     `json:"cc_pin" gorm:"column:cc_pin"`
 	Coupon      string     `json:"coupon"`
 	Bc          string     `json:"bc"`
 	Amount      int        `json:"amount"`
 	Discount    int        `json:"discount"`
 	Mons        int        `json:"mons"`
-	ReceiptUrl  string     `json:"receiptUrl"`
-	ReceiptSn   string     `json:"receiptSn"`
-	ErrMsg      string     `json:"errMsg"`
-	CustomMsg   string     `json:"customMsg"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	scheduledAt *KoTime    `json:"scheduledAt"`
-	PaidAt      *time.Time `json:"paidAt"`
-	EventId     int        `json:"eventId"`
+	ReceiptUrl  string     `json:"receipt_url"`
+	ReceiptSn   string     `json:"receipt_sn"`
+	ErrMsg      string     `json:"err_msg"`
+	CustomMsg   string     `json:"custom_msg"`
+	CreatedAt   time.Time  `json:"created_at"`
+	scheduledAt *KoTime    `json:"scheduled_at"`
+	PaidAt      *time.Time `json:"paid_at"`
+	EventId     int        `json:"event_id"`
 }
 
 type Inventory struct {
 	Id               int     `json:"id" gorm:"primary_key"`
-	BoxId            int     `json:"boxId"`
-	DispNum          int     `json:"dispNum"`
-	SkuId            int     `json:"skuId"`
-	LastSid          int     `json:"lastSid"`
-	OrderId          int     `json:"orderId"`
-	InventoryName    *string `json:"inventoryName"`
-	InventoryCaption *string `json:"inventoryCaption"`
+	BoxId            int     `json:"box_id"`
+	DispNum          int     `json:"disp_num"`
+	SkuId            int     `json:"sku_id"`
+	LastSid          int     `json:"last_sid"`
+	OrderId          int     `json:"order_id"`
+	InventoryName    *string `json:"inventory_name"`
+	InventoryCaption *string `json:"inventory_caption"`
 }
 
 type InventoryState struct {
 	Id          int       `json:"id" gorm:"primary_key"`
-	InventoryId int       `json:"inventoryId"`
-	EventId     int       `json:"eventId"`
-	UpdaterId   int       `json:"updaterId"`
-	HistoryDate time.Time `json:"historyDate"`
+	InventoryId int       `json:"inventory_id"`
+	EventId     int       `json:"event_id"`
+	UpdaterId   int       `json:"updater_id"`
+	HistoryDate time.Time `json:"history_date"`
 }
 
 type Category struct {
-	SkuId     int    `json:"skuId"`
-	CatKey    string `json:"catKey"`
-	CatName   string `json:"catName"`
+	SkuId     int    `json:"sku_id"`
+	CatKey    string `json:"cat_key"`
+	CatName   string `json:"cat_name"`
 	Amount    int    `json:"amount"`
-	BuyUnit   string `json:"buyUnit"`
+	BuyUnit   string `json:"buyunit"`
 	Min       int    `json:"min"`
-	PriceMark int    `json:"priceMark"`
+	PriceMark int    `json:"pricemark"`
 	Image     string `json:"image"`
 	Ximage    string `json:"ximage"`
 	Comment   string `json:"comment"`
@@ -168,16 +169,16 @@ type AdminComment struct {
 
 type Ask struct {
 	Id         int       `json:"id" gorm:"primary_key"`
-	ThreadId   int       `json:"threadId"`
-	UserId     int       `json:"userId"`
-	PosterName *string   `json:"posterName"`
-	PosterTel  *string   `json:"posterTel"`
+	ThreadId   int       `json:"thread_id"`
+	UserId     int       `json:"user_id"`
+	PosterName *string   `json:"poster_name"`
+	PosterTel  *string   `json:"poster_tel"`
 	Title      string    `json:"title"`
 	Content    string    `json:"content"`
 	Complete   bool      `json:"complete"`
-	CreatedAt  time.Time `json:"createdAt"`
-	UpdatedAt  time.Time `json:"updatedAt"`
-	DeletedAt  time.Time `json:"deletedAt"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	DeletedAt  time.Time `json:"deleted_at"`
 }
 
 type Coupon struct {
@@ -185,9 +186,9 @@ type Coupon struct {
 	Code          string `json:"code"`
 	CouponCaption string `json:"caption"`
 	Amount        int    `json:"amount"`
-	SkuAllow      int    `json:"skuAllow"`
-	CreatedAt     string `json:"createdAt"`
-	ExpiredAt     string `json:"expiredAt"`
+	SkuAllow      int    `json:"sku_allow"`
+	CreatedAt     string `json:"created_at"`
+	ExpiredAt     string `json:"expired_at"`
 }
 
 type Feed struct {
@@ -198,20 +199,20 @@ type Feed struct {
 	Url       string    `json:"url"`
 	Popup     string    `json:"popup" gorm:"default:'n'"`
 	Agent     string    `json:"agent"`
-	FeedPos   string    `json:"feedPos"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	ExpiredAt time.Time `json:"expiredAt"`
+	FeedPos   string    `json:"feed_pos"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	ExpiredAt time.Time `json:"expired_at"`
 }
 
 type Attachment struct {
 	Id         int       `json:"id" gorm:"primary_key"`
-	RefId      int       `json:"refId"`
-	RepoType   string    `json:"repoType"`
-	Filename   string    `json:"fileName"`
-	FileSize   int       `json:"fileSize"`
-	MimeType   string    `json:"mimeType"`
-	UploadedAt time.Time `json:"uploadedAt"`
+	RefId      int       `json:"ref_id"`
+	RepoType   string    `json:"repo_type"`
+	Filename   string    `json:"filename" gorm:"column:filename"`
+	FileSize   int       `json:"filenize" gorm:"column:filesize"`
+	MimeType   string    `json:"mimetype" gorm:"column:minetype"`
+	UploadedAt time.Time `json:"uploaded_at"`
 }
 
 type Pagination struct {
@@ -225,7 +226,7 @@ type OrderFilterRow struct {
 	Page        int           `query:"page"  json:"omit" gorm:"-"`
 	Limit       int           `query:"limit" json:"omit" gorm:"-"`
 	OrderId     int           `query:"orderId"  json:"orderId" gorm:"primary_key"`
-	OrderName   string        `json:"orderName"`
+	OrderName   string        `json:"order_name"`
 	OrderType   *string       `query:"orderType" json:"orderType"`
 	UserId      int           `query:"userId"   json:"userId"`
 	UserName    *string       `query:"userName" json:"userName"`
@@ -301,6 +302,7 @@ func (k *KoTime) Value() (driver.Value, error) {
 
 }
 
+//TODO htmlescape적용할 것!
 func (s *AdminComment) Scan(value interface{}) error {
 	str := string(value.([]byte))
 	str = strings.Replace(str, "\n", "<br/>", -1)
