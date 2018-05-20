@@ -1,0 +1,12 @@
+database:
+  driver: mysql
+  connection: aws:1Qwe5094$$@tcp(galaga.ccplhol987ub.ap-northeast-2.rds.amazonaws.com:3306)/ohoman?parseTime=true&charset=utf8
+  debug: true
+
+sms:
+  apikey: NCS587446277CC54
+  apisecret: 4447257F92C6763B1919E3377F38D683
+  senderkey: d8acb8f7330004cdc78c0bf12245a5b7ac3f95f1  
+
+host: 0.0.0.0
+port: :8080

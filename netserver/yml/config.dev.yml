@@ -1,0 +1,20 @@
+
+database:
+  driver: mysql
+  connection: aws:aws123@tcp(127.0.0.1:3306)/ohoman?parseTime=true&charset=utf8
+
+sms:
+  apikey: NCS587446277CC54
+  apisecret: 4447257F92C6763B1919E3377F38D683
+  senderkey: d8acb8f7330004cdc78c0bf12245a5b7ac3f95f1  
+
+iamport:
+  uri: https://api.iamport.kr
+  mid: nictest04m
+  secret: b+zhZ4yOZ7FsH8pm5lhDfHZEb79tIwnjsdA0FBXh86yLc6BJeFVrZFXhAoJ3gEWgrWwN+lJMV0W4hvDdbe4Sjw==
+  impKey: 9845496902780316
+  impSecrit: 2yfGHeyD5XfAWTz19mPfH0TszVvo3yE67UNO8lseiHPfAphKL7Zt7TWHOr6S0LY7FMWO7o3q5TFGiXq3
+
+host: 0.0.0.0
+port: :8080
+debug: true

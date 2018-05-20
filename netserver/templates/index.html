@@ -1,0 +1,195 @@
+{{define "Content" }}
+<div id="toolbar1" style="padding:3px">
+  <span>주문번호</span>
+  <input id="orderId" class="easyui-numberbox" style="width:100px">
+
+  <span>고객ID</span>
+  <input id="userId" class="easyui-numberbox" style="width:100px">
+
+  <span>주문자명</span>
+  <input id="userName" class="easyui-textbox" style="width:120px">
+
+  <span>주문일</span>
+  <input id="orderDate" class="easyui-datebox" style="width:105px">
+
+  <span>고객전화</span>
+  <input id="userTel" class="easyui-maskedbox" mask="999-9999-9999"  style="width:100px">
+
+  <span>받는이전화</span>
+  <input id="toTel" class="easyui-maskedbox" mask="999-9999-9999"  style="width:100px">
+
+  <span>배송일</span>
+  <input id="dueDate" class="easyui-datebox"  style="width:105px">
+
+  <span>배송시간</span>
+  <select id="dueTime" class="easyui-combobox" style="width:80px">
+    <option value=""></option>
+    <option value="10">10시</option>
+    <option value="11">11시</option>
+    <option value="13">13시</option>
+    <option value="15">15시</option>
+    <option value="17">17시</option>
+    <option value="19">19시</option>
+  </select>
+
+  <span>정기결제일</span>
+  <input id="subscbDay" class="easyui-numberbox" maxlength="2"  style="width:45px">
+
+  <a href="#" class="easyui-linkbutton" plain="true" onclick="doSearch()">검색</a>
+  <a href="#" class="easyui-linkbutton" plain="true" onclick="doClean()">초기화</a>
+</div>
+
+<table class="easyui-datagrid" id="grid">
+  <thead>
+    <tr>
+      <th data-options="field:'order_id', width:60, fixed:true,  align:'right'">주문번호</th>
+      <th data-options="field:'order_type', width:90, align: 'center',  formatter:orderEventFormat">주문종류</th>
+      <th data-options="field:'order_date', width:90, formatter:dateShortFormat">주문일</th>
+      <th data-options="field:'cancel_date', width:90, formatter:dateShortFormat">취소일</th>
+      <th data-options="field:'user_name', width:90, align:'center', formatter:userFormat ">고객명/ID</th>
+      <th data-options="field:'user_tel', width:100, formatter:phoneFormat" >고객연락처</th>
+      <th data-options="field:'order_state', width:150">서비스/수량</th>
+      <th data-options="field:'cancel_state', width:100">취소/수량</th>
+      <th data-options="field:'amount', width:100">결제금액</th>
+      <th data-options="field:'subscb_id',width:170, formatter:custom2Format">정기결제</th>
+      <th data-options="field:'address', width:200, formatter:customFormat">방문스케쥴</th>
+      <th data-options="field:'customer_memo', width:200">고객메모</th>
+      <th data-options="field:'admin_comment', width:200, formatter:custom3Format">관리자메모</th>
+    </tr>
+  </thead>
+</table>
+
+<script>
+ var queryParams= { page: 1, limit: 20 };
+
+ function userFormat(value, row, index) {
+   return value + '/' + row.user_id;
+ }
+
+ //방문지
+ function customFormat(value, row, index) {
+   return $('<span/>').append(row.to_name + '/' +  phoneFormat(row.to_tel)).append('<br/>').append(row.address).append('<br/>').append( (dateShortFormat(row.due_date) || '미정') + ' ' + (row.due_time ? row.due_time + '시' : '')).html();
+ }
+
+ function custom2Format(value, row, index) {
+   if(value) 
+     return $('<span/>').append('신청번호 ' + value).append('<br/>').append('결제시작일 ' + (dateShortFormat(row.subscb_date)||'<span style="color:red">미정</span>') ).html();
+   else
+     return ''
+ }
+
+ function custom3Format(value, row, index) {
+   if(value)
+     return $('<span/>').append(row.admin_comment.comment).append('<br/>').append('- ' + row.admin_comment.nick + '(' + dateLongFormat(row.admin_comment.created_at)  + ')').html();
+   else
+     return ''
+ }
+
+ function callParam() {
+   var param = {
+     order_id: $('#orderId').val(),
+     user_id: $('#userId').val(),
+     user_name: $('#userName').val(),
+     user_tel: $('#userTel').val().replace(/[^0-9]*/g,''),
+     order_date: $('#orderDate').val(),
+     to_tel: $('#toTel').val().replace(/[^0-9]*/g, ''),
+     due_date: $('#dueDate').val(),
+     due_time: $('#dueTime').val(),
+     subscb_day: $('#subscbDay').val()
+   };
+
+   return $.extend(_.omitBy(param, function(i) {
+     return i == undefined || i == null ||  i.trim() == '';
+   }), queryParams);
+ }
+
+
+ function fetch(params) {
+   $.ajax({
+     url: '/api/order',
+     data: params,
+     async: true,
+     cache: false,
+     dataType: 'json',
+     beforeSend: function() { $('#grid').datagrid('loading'); }
+   }).done(function(res) {
+     $('#grid').datagrid('loadData', res.rows);
+     $('#grid').datagrid('getPager').pagination({
+       total: res.count,
+       pageSize: res.limit,
+       pageNumber: res.page
+     });
+   }).always(function(){
+     $('#grid').datagrid('loaded');
+   });
+ }
+
+ function doSearch() {
+   fetch(callParam());
+ }
+ 
+ function doClean() {
+   $('#toolbar1 input').val('');
+   fetch(callParam());
+ }
+
+ $(function() {
+
+   $('#grid').datagrid({
+     toolbar: '#toolbar1',
+     idField: 'order_id',
+     nowrap: false,
+     loadMsg: '수신 중...',
+     emptyMsg: '데이터가 없습니다',
+     pagination: true,
+     singleSelect: true,
+     pageSize: queryParams.limit,
+     pageList: [10,20,30,40,50,100],
+     rowStyler: function(index,row){
+		   if (row.cancel_date){
+			   return 'background-color:#8e3030;color:#fff;';
+		   }
+	   },
+     onDblClickRow: function(index, row) {
+       window.open('/manager/order/' + row.order_id);
+     }
+   });
+
+   $('#grid').datagrid('getPager').pagination({
+     onSelectPage: function(pageNum, pageSize) {
+       queryParams.page = pageNum;
+       queryParams.limit = pageSize;
+       fetch(callParam());
+     }
+   });
+   
+   $('#orderDate').datebox({
+     currentText: '오늘',
+     okText: '선택',
+     closeText: '닫기',
+     formatter: function(date) {
+       return dateFns.format(date, 'YYYY/MM/DD');
+     },
+     parser: function(str) {
+       console.log(str);
+     }
+   });
+
+   $('#dueDate').datebox({
+     currentText: '오늘',
+     okText: '선택',
+     closeText: '닫기',
+     formatter: function(date) {
+       return dateFns.format(date, 'YYYY/MM/DD');
+     },
+     parser: function(str) {
+       console.log(str);
+     }
+   });
+
+   fetch(queryParams);
+   
+
+ });
+</script>
+{{end}}
