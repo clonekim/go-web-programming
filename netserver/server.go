@@ -51,8 +51,8 @@ type Asset struct {
 	Box *rice.Box
 }
 
-func NewAsset(name string) *Asset {
-	box, error := rice.FindBox(name)
+func NewAsset() *Asset {
+	box, error := rice.FindBox("templates")
 	if error != nil {
 		panic(error)
 	}
@@ -70,8 +70,9 @@ func getLogger() *log.MyLogger {
 	return log.Logger()
 }
 
-func EchoStart(asset *Asset) {
+func EchoStart() {
 
+	asset := NewAsset()
 	e := echo.New()
 	e.Logger = getLogger()
 	e.Renderer = &Template{Box: asset.Box}
