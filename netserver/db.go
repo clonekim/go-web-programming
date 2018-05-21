@@ -17,6 +17,6 @@ func OpenDatabase() *gorm.DB {
 
 	Log.Println("Open database")
 	DB.LogMode(Conf.Debug)
-	DB.SingularTable(true)
+	//	DB.SingularTable(true)
 	return DB
 }

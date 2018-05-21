@@ -8,6 +8,7 @@ import (
 	"github.com/go-ozzo/ozzo-validation"
 	_ "github.com/go-ozzo/ozzo-validation/is"
 	"regexp"
+
 	"strings"
 	"time"
 )
@@ -45,7 +46,8 @@ func (user User) Validate() error {
 	return validation.ValidateStruct(&user,
 		validation.Field(&user.Username,
 			validation.Required.Error("사용자 아이디는 필수값입니다"),
-			validation.Length(4, 20).Error("사용자 아이디는 4-20자이내로 입력하세요")),
+			validation.Length(4, 20).Error("사용자 아이디는 4-20자이내로 입력하세요"),
+			validation.By(UserNameExists)),
 
 		validation.Field(&user.Nick,
 			validation.Required.Error("이름은 필수값입니다"),
@@ -62,10 +64,10 @@ func (user User) Validate() error {
 
 }
 
-func (user *User) BeforeCreate() error {
-	var exist User
-	if DB.Where("username=?", user.Username).First(&exist).RecordNotFound() {
-		Log.Debug("사용자가 존재하지 않음")
+//Custom Validation
+func UserNameExists(value interface{}) error {
+	name, _ := value.(string)
+	if DB.Where("username=?", name).RecordNotFound() {
 		return nil
 	} else {
 		return errors.New("사용자가 존재합니다")
@@ -126,22 +128,51 @@ func (role *Role) Save() error {
 }
 
 type Address struct {
-	Id      int    `json:"id" gorm:"primary_key"`
-	UserId  int    `json:"user_id"`
-	Name    string `json:"name"`
-	Line1   string `json:"line1"`
-	Line2   string `json:"line2"`
-	Zipcode string `json:"zipcode"`
+	Id        int    `json:"id" gorm:"primary_key"`
+	UserId    int    `json:"user_id"`
+	AddrName  string `json:"addr_name"`
+	AddrLine1 string `json:"addr_line1"`
+	AddrLine2 string `json:"addr_line2"`
+	Zipcode   string `json:"zipcode"`
 }
 
 type Card struct {
-	Id        int       `json:"id" gorm:"primary_key"`
-	UserId    int       `json:"user_id"`
-	CCName    string    `json:"cc_name" gorm:"column:cc_name"`
-	CCPin     string    `json:"cc_pin" gorm:"column:cc_pin"`
-	CreatedAt time.Time `json:"created_at`
-	DeletedAt time.Time `json:"deleted_at`
+	Id        int        `json:"id" gorm:"primary_key"`
+	UserId    int        `json:"user_id"`
+	CCName    string     `json:"cc_name" gorm:"column:cc_name"`
+	CCNum     string     `json:"cc_num" gorm:"column:cc_num"`
+	CCPin     string     `json:"cc_pin"  gorm:"column:cc_pin"`
+	Pwd2Digit string     `json:"pwd_2digit" gorm:"-"`
+	Expiry    string     `json:"expiry" gorm:"-"`
+	CreatedAt time.Time  `json:"created_at`
+	DeletedAt *time.Time `json:"deleted_at`
 }
+
+func (card Card) Validate() error {
+	return validation.ValidateStruct(&card,
+		validation.Field(&card.UserId,
+			validation.Required.Error("사용자 식별아아디는 필수입력 값입니다")),
+
+		validation.Field(&card.CCNum,
+			validation.Required.Error("카드번호 입력하세요")),
+
+		validation.Field(&card.Pwd2Digit,
+			validation.Required.Error("비밀번호 앞2자리를 입력하세요")),
+
+		validation.Field(&card.Expiry,
+			validation.Required.Error("카드 유효기간을 입력하세요")),
+	)
+}
+
+// func (card *Card) Save() {
+// 	ccnames := strings.Split(card.CCName, "-")
+// 	card.CCPin = strconv.Itoa(card.UserId) + ccnames[3]
+// 	tx := DB.Begin()
+
+// 	if DB.Where("cc_pin=?", card.CCPin).RecordNotFound() {
+
+// 	}
+// }
 
 type Account struct {
 	UserId        int    `json:"user_id" gorm:"primary_key"`
