@@ -2,13 +2,12 @@ package netserver
 
 import (
 	"bonjour/iamport"
-	"fmt"
 )
 
 var Client *iamport.Client
 
 func InitClient() {
-	fmt.Println("--- Initialize Client ---")
+	Log.Println("Initialize Client")
 
 	Client = &iamport.Client{
 		Uri:       Conf.Iamport.Uri,

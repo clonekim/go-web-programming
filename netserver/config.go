@@ -1,7 +1,6 @@
 package netserver
 
 import (
-	"fmt"
 	"github.com/GeertJohan/go.rice"
 	"github.com/spf13/viper"
 	"os"
@@ -77,6 +76,6 @@ func LoadConfig() {
 	if err := viper.Unmarshal(&Conf); err != nil {
 		panic(err)
 	}
-	fmt.Printf("--- Load config from %s ---\n", confile)
+	Log.Printf("Load config from %s", confile)
 
 }

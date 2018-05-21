@@ -3,32 +3,99 @@ package netserver
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/go-ozzo/ozzo-validation"
+	_ "github.com/go-ozzo/ozzo-validation/is"
+	"regexp"
 	"strings"
 	"time"
 )
 
 type User struct {
-	Id        int       `json:"id" gorm:"primary_key"`
-	Name      string    `json:"name"`
-	Nick      string    `json:"nick"`
-	Password  *string   `json:"password"`
-	Tel       *string   `json:"tel"`
-	Email     *string   `json:"email"`
-	Sex       *string   `json:"sex"`
-	Birth     *string   `json:"birth"`
-	AgreeMkt  int8      `json:"agree_mkt"`
-	Image     *string   `json:"image"`
-	Sns       *string   `json:"sns"`
-	SnsId     *string   `json:"sns_id"`
-	Job       *string   `json:"job"`
-	City      *string   `json:"city"`
-	House     *string   `json:"house"`
-	Family    *string   `json:"family"`
-	SignCh    *string   `json:"sign_ch"`
-	SignPp    *string   `json:"sign_pp"`
-	CreatedAt time.Time `json:"created_at"`
-	DeletedAt time.Time `json:"deleted_dt"`
+	Id        int        `json:"id" gorm:"primary_key"`
+	Username  string     `json:"username"`
+	Nick      string     `json:"nick"`
+	Password  *string    `json:"password"`
+	Tel       *string    `json:"tel"`
+	Email     *string    `json:"email"`
+	Sex       *string    `json:"sex"`
+	Birth     *string    `json:"birth"`
+	AgreeMkt  int8       `json:"agree_mkt" gorm:"default:'0'"`
+	Image     *string    `json:"image"`
+	Sns       *string    `json:"sns"`
+	SnsId     *string    `json:"sns_id"`
+	Job       *string    `json:"job"`
+	City      *string    `json:"city"`
+	House     *string    `json:"house"`
+	Family    *string    `json:"family"`
+	SignCh    *string    `json:"sign_ch"`
+	SignPp    *string    `json:"sign_pp"`
+	CreatedAt time.Time  `json:"created_at"`
+	DeletedAt *time.Time `json:"deleted_dt"`
+	Roles     []Role     `json:"roles" gorm:"-"`
+}
+
+func (user User) TableName() string {
+	return "users"
+}
+
+func (user User) Validate() error {
+
+	return validation.ValidateStruct(&user,
+		validation.Field(&user.Username,
+			validation.Required.Error("사용자 아이디는 필수값입니다"),
+			validation.Length(4, 20).Error("사용자 아이디는 4-20자이내로 입력하세요")),
+
+		validation.Field(&user.Nick,
+			validation.Required.Error("이름은 필수값입니다"),
+			validation.Length(2, 50).Error("이름은 2-50자 이내로 입력하세요")),
+
+		validation.Field(&user.Password,
+			validation.Required.Error("패스워드는 필수값입니다"),
+			validation.Length(4, 12).Error("패스워드는 4-12자이내로 입력하세요")),
+
+		validation.Field(&user.Tel,
+			validation.Required.Error("휴대폰번호는 필수값입니다"),
+			validation.Match(regexp.MustCompile("^[0-9]{11}$")).Error("유효하지 않는 번호형식입니다")),
+	)
+
+}
+
+func (user *User) BeforeCreate() error {
+	var exist User
+	if DB.Where("username=?", user.Username).First(&exist).RecordNotFound() {
+		Log.Debug("사용자가 존재하지 않음")
+		return nil
+	} else {
+		return errors.New("사용자가 존재합니다")
+	}
+}
+
+func (user *User) Save() error {
+
+	if err := user.Validate(); err != nil {
+		return err
+	}
+
+	tx := DB.Begin()
+
+	if err := tx.Create(&user).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	role := Role{UserId: user.Id, RoleName: "user"}
+	if err := tx.Create(&role).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+	user.Roles = make([]Role, 1)
+	user.Roles[0] = role
+	user.Password = nil
+	return nil
 }
 
 type LoginLog struct {
@@ -41,6 +108,21 @@ type Role struct {
 	Id       int    `json:"id" gorm:"primary_key"`
 	UserId   int    `json:"user_id"`
 	RoleName string `json:"role_name"`
+}
+
+func (role Role) Validate() error {
+	return validation.ValidateStruct(&role,
+		validation.Field(&role.UserId,
+			validation.Required.Error("사용자 아이디는 필수값입니다")),
+	)
+}
+
+func (role *Role) Save() error {
+	if err := DB.Create(&role).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type Address struct {

@@ -1,7 +1,7 @@
 
 database:
   driver: mysql
-  connection: aws:aws123@tcp(127.0.0.1:3306)/ohoman?parseTime=true&charset=utf8
+  connection: aws:aws123@tcp(127.0.0.1:3306)/backend?parseTime=true&charset=utf8
 
 sms:
   apikey: NCS587446277CC54

@@ -2,16 +2,13 @@ package netserver
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/GeertJohan/go.rice"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	echoLog "github.com/labstack/gommon/log"
 	"github.com/neko-neko/echo-logrus/log"
 	"html/template"
 	"io"
 	"net/http"
-	"os"
 )
 
 //에코 템플릿
@@ -23,13 +20,11 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 
 	templateLayout, err := t.Box.String("layout.html")
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
 	templateString, err := t.Box.String(name)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -40,7 +35,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	tmplMsg, err := template.New("Dummy").Parse(buff.String())
 
 	if err != nil {
-		fmt.Println(err)
+		Log.WithField("Template Error", err).Debug("Template error is")
 		return err
 	}
 
@@ -52,6 +47,7 @@ type Asset struct {
 }
 
 func NewAsset() *Asset {
+	Log.Println("Asset loading")
 	box, error := rice.FindBox("templates")
 	if error != nil {
 		panic(error)
@@ -62,21 +58,48 @@ func NewAsset() *Asset {
 	}
 }
 
-// 에코 템플릿 끝
-
-func getLogger() *log.MyLogger {
-	log.Logger().SetOutput(os.Stdout)
-	log.Logger().SetLevel(echoLog.DEBUG)
-	return log.Logger()
+type Validations interface {
+	Validate() error
 }
 
-func EchoStart() {
+type ValidatorCaller struct {
+}
 
+func (c *ValidatorCaller) Validate(i interface{}) (err error) {
+	v := i.(Validations)
+	Log.Debugf("Request is %#v", i)
+	err = v.Validate()
+
+	logEntry := Log.WithField("Validation Result", err)
+
+	if err != nil {
+		logEntry.Error("Validation Fail")
+	} else {
+		logEntry.Debug("Validaion Ok")
+	}
+	return
+}
+
+// 에코 템플릿 끝
+
+func EchoStart() {
 	asset := NewAsset()
+	Log.Println("Start echo server")
+
 	e := echo.New()
-	e.Logger = getLogger()
+	e.Logger = log.Logger()
 	e.Renderer = &Template{Box: asset.Box}
+	e.Validator = &ValidatorCaller{}
 	e.Use(middleware.Recover())
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			err := next(c)
+			if err != nil {
+				Log.Error(err)
+			}
+			return err
+		}
+	})
 
 	//라우터
 	templateHandler := http.FileServer(asset.Box.HTTPBox())
@@ -84,6 +107,9 @@ func EchoStart() {
 	e.GET("/", func(c echo.Context) error {
 		return c.Render(200, "index.html", echo.Map{})
 	})
+
+	v1 := e.Group("/v1")
+	v1.POST("/user", UserCreate)
 
 	e.GET("/*", echo.WrapHandler(http.StripPrefix("/", templateHandler)))
 
