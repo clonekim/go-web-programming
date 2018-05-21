@@ -4,5 +4,6 @@ flymake*
 webpack
 package-*.json
 *.log
+*.exec
 
 
